@@ -202,10 +202,8 @@ export default {
       }
     },
 
-    handleMotion(event) {
+    onMotionData(acc) {
       if (this.screen !== 'playing') return
-      const acc = event.accelerationIncludingGravity || event.acceleration
-      if (!acc) return
       this.processMotion(acc)
     },
 
