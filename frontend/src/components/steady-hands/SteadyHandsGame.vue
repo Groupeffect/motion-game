@@ -61,6 +61,9 @@ export default {
   },
   methods: {
     async handleStart() {
+      // Guard: prevent starting a new countdown if one is already running
+      if (this.screen === 'countdown') return
+
       this.initAudio()
       this.installMotionListener()
 
