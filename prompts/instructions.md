@@ -1,4 +1,4 @@
-check the index.html against current frontend app and ensure sensor access works accordingly.
+check the index.html against current frontend app and ensure sensor access and permissions work on pwa mode when installed or is running as build on github pages.
 
 update the home `frontend/src/views/HomeView.vue` page to show:
 

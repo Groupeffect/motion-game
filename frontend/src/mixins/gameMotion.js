@@ -46,6 +46,11 @@ export default {
       this.lastAcc.x = x
       this.lastAcc.y = y
       this.lastAcc.z = typeof z === 'number' ? z : null
+
+      // Notify component that fresh sensor data is available
+      if (typeof this.onMotionData === 'function') {
+        this.onMotionData({ x, y, z })
+      }
     },
 
     waitForSensor(timeout = 5000) {
