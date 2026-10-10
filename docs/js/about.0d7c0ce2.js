@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkfrontend"]=self["webpackChunkfrontend"]||[]).push([[594],{866:function(n,e,t){t.r(e),t.d(e,{default:function(){return c}});var r=t(641);function u(n,e,t,u,o,a){return(0,r.uX)(),(0,r.CE)("div")}var o={name:"AboutView",components:{},mixins:[],props:{apiUrl:String},data:()=>({}),computed:{},methods:{},mounted(){},created(){}},a=t(262);const d=(0,a.A)(o,[["render",u]]);var c=d}}]);
+//# sourceMappingURL=about.0d7c0ce2.js.map

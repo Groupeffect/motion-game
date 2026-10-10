@@ -6,17 +6,20 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "https": "cd ./dist && caddy file-server --listen :443 --domain 10.220.119.88"
+    "https": "cd ../docs && caddy file-server --listen :443 --domain 10.220.119.88"
   },
   "dependencies": {
+    "@vue/devtools-api": "^8.2.1",
     "pinia": "^4.0.3",
-    "pinia-orm":"^2.0.0",
+    "pinia-orm": "^2.0.0",
     "register-service-worker": "^1.7.2",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-pwa": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",

@@ -1,7 +1,8 @@
 <template>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/about">About</router-link> |
+    <router-link to="/steady-hands">Steady Hands</router-link>
   </nav>
   <router-view/>
 </template>
@@ -26,5 +27,17 @@ nav a {
 
 nav a.router-link-exact-active {
   color: #42b983;
+}
+
+/* Steady Hands game global styles */
+body {
+  overflow: hidden;
+  touch-action: none;
+}
+
+#steady-hands-game {
+  background: #0d1117;
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
 }
 </style>
