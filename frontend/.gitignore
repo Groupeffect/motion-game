@@ -22,3 +22,4 @@ pnpm-debug.log*
 *.sln
 *.sw?
 frontend/node_modules
+prompts

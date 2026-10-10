@@ -14,7 +14,8 @@ export default class Interface extends Model {
       id: this.uid(),
       name: this.string(''),
       key: this.string(''),
-      value: this.attr(null)
+      value: this.attr(null),
+      
     }
   }
 }
