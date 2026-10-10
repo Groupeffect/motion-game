@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h3>Version {{ $version }}</h3>
   </div>
 </template>
 <script>
@@ -8,7 +9,8 @@
     components:{},
     mixins:[],
     props: {apiUrl: String},
-    data: () => ({}),
+    data: () => ({
+    }),
     computed: {},
     methods: {},
     mounted() {},

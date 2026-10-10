@@ -107,3 +107,32 @@ Configure `@vue/cli-plugin-pwa` with:
 
 ## Pending: Standalone `index.html` fixes
 Not implemented yet — needs `manifest.json`, `sw.js`, Permissions-Policy meta, iOS PUA meta tags.
+
+---
+
+## HomeView Sensor Dashboard ✅ DONE (2026-10-10)
+
+Created `frontend/src/mixins/deviceSensor.js` and updated `frontend/src/views/HomeView.vue` to show:
+
+| Section | What it shows |
+|---------|--------------|
+| **Accelerometer** | Live x/y/z values in m/s², status indicator |
+| **Orientation** | Live α/β/γ angles in degrees, status indicator |
+| **Platform** | iOS, Android, macOS, Linux, Windows, Other |
+| **Environment** | PWA vs Browser, HTTPS/HTTP indicator |
+| **Permissions** | accelerometer, gyroscope, device-orientation states |
+| **Errors/Warnings** | Permission denials, API unavailability notices |
+
+### Key features:
+- Auto-requests iOS permission on mount for `DeviceMotionEvent` and `DeviceOrientationEvent`
+- Real-time sensor values displayed in a responsive CSS grid
+- Dark theme matching the app's existing palette (`#0d1117` base)
+- Works in PWA installed mode and GitHub Pages deployment
+- Permissions auto-update via `navigator.permissions` change listeners
+
+### Debug results:
+- ✅ Dev server (`npm run serve`) — compiled successfully, no errors
+- ✅ Production build (`npm run build`) — passes, 0 errors in our code
+- ✅ JS syntax validation — all files valid
+- ✅ ESLint — 3 pre-existing warnings (MainMixin.js, gameAudio.js), 0 from new code
+- ✅ Runtime: `sensors` init as `null` with `v-if` guard prevents access-to-undefined errors
