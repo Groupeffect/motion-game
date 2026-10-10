@@ -103,7 +103,6 @@ export default {
           this.countdownValue = ''
           this.startGame()
           this.screen = 'playing'
-          this.setInitialBase()
 
           this.warningTimer = setTimeout(() => {
             if (this.screen === 'playing' && !this.gotMotionData) {
@@ -120,12 +119,17 @@ export default {
       if (!record) {
         record = { id: 'session' }
       }
+
+      // Capture baseline from latest sensor data (or default to 0)
+      const baseX = this.lastAcc.x !== null ? this.lastAcc.x : 0
+      const baseY = this.lastAcc.y !== null ? this.lastAcc.y : 0
+
       Object.assign(record, {
         hp: 100,
         running: true,
         startTime: Date.now(),
-        baseX: record.baseX || 0,
-        baseY: record.baseY || 0,
+        baseX,
+        baseY,
         survivalTime: '0',
         feedbackIntensity: 0,
         hpColorClass: 'green'
