@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <h3>Version: {{ version }}</h3>
     <img alt="Vue logo" src="../assets/logo.png">
   </div>
 </template>
@@ -11,7 +12,9 @@
     components:{},
     mixins:[],
     props: {apiUrl: String},
-    data: () => ({}),
+    data: () => ({
+      version: 1
+    }),
     computed: {},
     methods: {},
     mounted() {},

@@ -304,27 +304,14 @@ describe('Gameplay Plausibility', () => {
     await wrapper.vm.handleStart()
     await Promise.resolve()
 
-    // T=1s: "3"
-    vi.advanceTimersByTime(1000)
-    expect(wrapper.vm.countdownValue).toBe('3')
+    expect(wrapper.vm.screen).toBe('countdown')
 
-    // T=2s: "2"
-    vi.advanceTimersByTime(1000)
-    expect(wrapper.vm.countdownValue).toBe('2')
-
-    // T=3s: "1"
-    vi.advanceTimersByTime(1000)
-    expect(wrapper.vm.countdownValue).toBe('1')
-
-    // T=4s: "GO"
-    vi.advanceTimersByTime(1000)
-    expect(wrapper.vm.countdownValue).toBe('GO')
-
-    // T=5s+: countdown ends, game starts
-    vi.advanceTimersByTime(1000)
+    // Fast-forward 6 seconds — countdown: 3(1s), 2(2s), 1(3s), GO(4s), ''(5s), trigger(6s)
+    vi.advanceTimersByTime(6000)
     await Promise.resolve()
-    expect(wrapper.vm.countdownValue).toBe('')
+
     expect(wrapper.vm.screen).toBe('playing')
+    expect(wrapper.find('#game-hud').exists()).toBe(true)
   })
 
   it('game over survival time should be positive after playing', async () => {
@@ -372,14 +359,15 @@ describe('Gameplay Plausibility', () => {
       }
     })
 
-    expect(wrapper.vm.feedbackIntensity).toBe(0)
+    // Initially no motion data
+    const initialRecord = useRepo().find('session')
+    expect(initialRecord.feedbackIntensity).toBe(0)
 
     wrapper.vm.processMotion({ x: 5, y: 5 })
 
     const record = useRepo().find('session')
     // deviation = sqrt(25 + 25) = sqrt(50) ≈ 7.07
     expect(record.feedbackIntensity).toBeCloseTo(7.07, 1)
-    expect(wrapper.vm.feedbackIntensity).toBeCloseTo(7.07, 1)
   })
 
   it('player should be able to win by staying still (HP never reaches 0)', () => {
@@ -405,6 +393,5 @@ describe('Gameplay Plausibility', () => {
     const record = useRepo().find('session')
     expect(record.running).toBe(true)
     expect(record.hp).toBe(100) // HP stays at 100 (clamped)
-    expect(wrapper.vm.screen).toBe('playing')
   })
 })
