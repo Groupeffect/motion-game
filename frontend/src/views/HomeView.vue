@@ -13,7 +13,7 @@
     mixins:[],
     props: {apiUrl: String},
     data: () => ({
-      version: 1
+      version: '0.0.1'
     }),
     computed: {},
     methods: {},
