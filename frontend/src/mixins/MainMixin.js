@@ -8,10 +8,13 @@ export default {
             return useRepo(Interface).all()
         },
         $rest_framework(){
-            return $REST_FRAMEWORK || null
+            return {"error":"not implemented","user":{"username":"demo"}}
         },
         $user(){
             return this.$rest_framework.user || null
+        },
+        $version(){
+            return '0.0.2'
         }
     },
     methods: {

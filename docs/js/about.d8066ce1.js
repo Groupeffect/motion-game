@@ -1,0 +1,2 @@
+"use strict";(self["webpackChunkfrontend"]=self["webpackChunkfrontend"]||[]).push([[594],{653:function(n,e,r){r.r(e),r.d(e,{default:function(){return d}});var t=r(641),u=r(33);function o(n,e,r,o,i,s){return(0,t.uX)(),(0,t.CE)("div",null,[(0,t.Lk)("h3",null,"Version "+(0,u.v_)(n.$version),1)])}var i={name:"AboutView",components:{},mixins:[],props:{apiUrl:String},data:()=>({}),computed:{},methods:{},mounted(){},created(){}},s=r(262);const a=(0,s.A)(i,[["render",o]]);var d=a}}]);
+//# sourceMappingURL=about.d8066ce1.js.map
