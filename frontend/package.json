@@ -6,7 +6,10 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "https": "cd ../docs && caddy file-server --listen :443 --domain 10.220.119.88"
+    "https": "cd ../docs && caddy file-server --listen :443 --domain 10.220.119.88",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@vue/devtools-api": "^8.2.1",
@@ -20,13 +23,18 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.24.7",
     "@babel/preset-env": "^7.24.7",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vitest/coverage-v8": "^5.0.3",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-pwa": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-plugin-vuex": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
+    "@vue/test-utils": "^2.5.1",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
+    "jsdom": "^30.1.2",
+    "vitest": "^5.0.3",
     "vue-cli-plugin-pinia": "~0.2.4"
   }
 }
