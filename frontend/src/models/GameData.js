@@ -6,15 +6,15 @@ export default class GameData extends Model {
 
   static fields () {
     return {
-      id: this.uid(),
-      hp: this.attr(),
-      running: this.attr(),
-      startTime: this.attr(),
-      baseX: this.attr(),
-      baseY: this.attr(),
-      survivalTime: this.attr(),
-      feedbackIntensity: this.attr(),
-      hpColorClass: this.attr()
+      id: this.attr('session'),
+      hp: this.number(100),
+      running: this.boolean(false),
+      startTime: this.number(0),
+      baseX: this.number(0),
+      baseY: this.number(0),
+      survivalTime: this.string('0'),
+      feedbackIntensity: this.number(0),
+      hpColorClass: this.string('green')
     }
   }
 }
