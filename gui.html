@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shake Battle</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f0f1a;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+  }
+  .app {
+    width: 100%;
+    max-width: 420px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    padding: 20px;
+    position: relative;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  h1 { font-size: 1.8rem; text-align: center; margin-bottom: 8px; color: #fff; }
+  h2 { font-size: 1.3rem; margin-bottom: 16px; color: #fff; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 0.9rem; }
+
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
+  .btn-secondary { background: #2a2a4a; color: #ccc; border: 1px solid #3a3a5a; }
+  .btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
+  .btn-success { background: linear-gradient(135deg, #27ae60, #2ecc71); color: #fff; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .input-group { margin: 12px 0; }
+  .input-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #aaa; }
+  .input-group input, .input-group select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #3a3a5a;
+    background: #1e1e3a;
+    color: #fff;
+    font-size: 1rem;
+  }
+  .input-group input:focus, .input-group select:focus { outline: none; border-color: #667eea; }
+
+  .mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .mode-card {
+    padding: 20px 12px;
+    border-radius: 12px;
+    border: 2px solid #3a3a5a;
+    background: #1e1e3a;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .mode-card.selected { border-color: #667eea; background: rgba(102,126,234,0.1); }
+  .mode-card .icon { font-size: 2rem; margin-bottom: 8px; }
+  .mode-card .label { font-size: 0.9rem; font-weight: 600; }
+  .mode-card .desc { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+  .slider-group { margin: 16px 0; }
+  .slider-group label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+  .slider-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    background: #3a3a5a;
+    border-radius: 3px;
+    outline: none;
+  }
+  .slider-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+  }
+  .slider-value { color: #667eea; font-weight: 700; }
+
+  .lobby-game {
+    background: #1e1e3a;
+    border: 1px solid #3a3a5a;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .lobby-game:hover { border-color: #667eea; }
+  .lobby-game .game-name { font-weight: 700; font-size: 1.1rem; color: #fff; }
+  .lobby-game .game-info { font-size: 0.8rem; color: #888; margin-top: 4px; }
+
+  .countdown-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    display: none;
+  }
+  .countdown-overlay.active { display: flex; }
+  .countdown-number {
+    font-size: 6rem;
+    font-weight: 900;
+    color: #fff;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+  .hp-bar-container {
+    width: 100%;
+    height: 12px;
+    background: #2a2a4a;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 6px 0;
+  }
+  .hp-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.3s ease, background 0.3s;
+  }
+  .hp-green { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+  .hp-yellow { background: linear-gradient(90deg, #f39c12, #f1c40f); }
+  .hp-red { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+
+  .player-card {
+    background: #1e1e3a;
+    border-radius: 12px;
+    padding: 14px;
+    margin: 8px 0;
+    border: 1px solid #3a3a5a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .player-card.eliminated { opacity: 0.4; }
+  .player-card .avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.1rem; color: #fff;
+    flex-shrink: 0;
+  }
+  .player-card .info { flex: 1; }
+  .player-card .name { font-weight: 600; font-size: 0.95rem; }
+  .player-card .team { font-size: 0.75rem; color: #888; }
+  .player-card .hp-text { font-size: 0.85rem; font-weight: 700; min-width: 40px; text-align: right; }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 4px 0;
+  }
+  .badge-waiting { background: rgba(243,156,18,0.2); color: #f39c12; }
+  .badge-playing { background: rgba(46,204,113,0.2); color: #2ecc71; }
+  .badge-eliminated { background: rgba(231,76,60,0.2); color: #e74c3c; }
+
+  .shake-animation { animation: shake 0.1s infinite; }
+  @keyframes shake {
+    0%,100% { transform: translate(0); }
+    25% { transform: translate(-2px, 1px); }
+    50% { transform: translate(2px, -1px); }
+    75% { transform: translate(-1px, 2px); }
+  }
+
+  .game-over-screen { text-align: center; }
+  .winner-text { font-size: 2rem; font-weight: 900; color: #f1c40f; margin: 20px 0; }
+  .trophy { font-size: 4rem; margin-bottom: 10px; }
+
+  .tab-bar {
+    display: flex;
+    border-bottom: 2px solid #3a3a5a;
+    margin-bottom: 16px;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    color: #888;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab.active { color: #667eea; border-bottom-color: #667eea; }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2a2a4a;
+    border: 1px solid #667eea;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    z-index: 200;
+    display: none;
+    animation: fadeIn 0.3s;
+  }
+  .notification.show { display: block; }
+
+  .back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- SCREEN: MENU -->
+  <div class="screen active" id="screen-menu">
+    <h1>📳 Shake Battle</h1>
+    <p class="subtitle">Schüttel deine Gegner aus!</p>
+    <button class="btn btn-primary" onclick="showScreen('screen-lobby')">🎮 Lobby</button>
+    <button class="btn btn-secondary" onclick="showScreen('screen-create')">➕ Neues Spiel erstellen</button>
+    <button class="btn btn-secondary" onclick="showNotification('In Entwicklung...')">⚙️ Einstellungen</button>
+  </div>
+
+  <!-- SCREEN: LOBBY -->
+  <div class="screen" id="screen-lobby">
+    <button class="back-btn" onclick="showScreen('screen-menu')">←</button>
+    <h2>Lobby</h2>
+    <div class="input-group">
+      <label>Game-Name eingeben</label>
+      <input type="text" id="join-game-name" placeholder="z.B. Friends Night" oninput="filterLobby()">
+    </div>
+    <div id="lobby-list">
+      <div class="lobby-game" onclick="showScreen('screen-join')">
+        <div class="game-name">🔥 Friends Night</div>
+        <div class="game-info">4 Spieler · Team Mode · 3/10 Teams</div>
+      </div>
+      <div class="lobby-game" onclick="showScreen('screen-join')">
+        <div class="game-name">⚡ Speed Round</div>
+        <div class="game-info">7 Spieler · Free-For-All</div>
+      </div>
+      <div class="lobby-game" onclick="showScreen('screen-join')">
+        <div class="game-name">🎯 Pro League</div>
+        <div class="game-info">12 Spieler · Team Mode · 5/10 Teams</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="showScreen('screen-create')" style="margin-top:20px">➕ Neues Spiel erstellen</button>
+  </div>
+
+  <!-- SCREEN: CREATE GAME -->
+  <div class="screen" id="screen-create">
+    <button class="back-btn" onclick="showScreen('screen-menu')">←</button>
+    <h2>Neues Spiel</h2>
+    <div class="input-group">
+      <label>Game-Name</label>
+      <input type="text" id="create-game-name" placeholder="Dein Spielname" value="Mein Spiel">
+    </div>
+    <div class="input-group">
+      <label>Passwort</label>
+      <input type="password" id="create-password" placeholder="Passwort" value="1234">
+    </div>
+    <div class="input-group">
+      <label>Modus</label>
+      <div class="mode-cards">
+        <div class="mode-card selected" onclick="selectMode(this, 'team')">
+          <div class="icon">👥</div>
+          <div class="label">Team Mode</div>
+          <div class="desc">2–10 Teams</div>
+        </div>
+        <div class="mode-card" onclick="selectMode(this, 'ffa')">
+          <div class="icon">⚔️</div>
+          <div class="label">Free-For-All</div>
+          <div class="desc">Jeder für sich</div>
+        </div>
+      </div>
+    </div>
+    <div class="input-group" id="team-count-group">
+      <label>Anzahl Teams</label>
+      <select id="team-count">
+        <option value="2">2 Teams</option>
+        <option value="3" selected>3 Teams</option>
+        <option value="4">4 Teams</option>
+        <option value="5">5 Teams</option>
+        <option value="6">6 Teams</option>
+        <option value="7">7 Teams</option>
+        <option value="8">8 Teams</option>
+        <option value="9">9 Teams</option>
+        <option value="10">10 Teams</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>Dein Name (Host)</label>
+      <input type="text" id="host-name" placeholder="Dein Name" value="Host">
+    </div>
+    <div class="slider-group">
+      <label>Dein Handicap <span class="slider-value" id="host-handicap-val">50</span>/100</label>
+      <input type="range" min="0" max="100" value="50" id="host-handicap" oninput="document.getElementById('host-handicap-val').textContent=this.value">
+    </div>
+    <button class="btn btn-primary" onclick="startHosting()">🚀 Spiel erstellen & warten</button>
+  </div>
+
+  <!-- SCREEN: JOIN GAME -->
+  <div class="screen" id="screen-join">
+    <button class="back-btn" onclick="showScreen('screen-lobby')">←</button>
+    <h2>Beitreten</h2>
+    <div class="input-group">
+      <label>Passwort</label>
+      <input type="password" id="join-password" placeholder="Passwort eingeben" value="1234">
+    </div>
+    <div class="input-group">
+      <label>Dein Name</label>
+      <input type="text" id="join-name" placeholder="Dein Name" value="Player1">
+    </div>
+    <div class="input-group">
+      <label>Team wählen</label>
+      <select id="join-team">
+        <option value="1">Team 1</option>
+        <option value="2">Team 2</option>
+        <option value="3">Team 3</option>
+      </select>
+    </div>
+    <div class="slider-group">
+      <label>Handicap (vom Host gesetzt) <span class="slider-value">50</span>/100</label>
+      <input type="range" min="0" max="100" value="50" disabled>
+    </div>
+    <button class="btn btn-primary" onclick="joinGame()">✅ Beitreten</button>
+  </div>
+
+  <!-- SCREEN: WAITING ROOM -->
+  <div class="screen" id="screen-waiting">
+    <button class="back-btn" onclick="showScreen('screen-menu')">←</button>
+    <h2>Wartezimmer</h2>
+    <p class="subtitle" id="waiting-subtitle">Warte auf Spieler...</p>
+    <div id="waiting-players"></div>
+    <div style="margin-top:20px">
+      <button class="btn btn-success" id="btn-start" onclick="startCountdown()" disabled>▶️ Start (mind. 2 Spieler)</button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-menu')" style="margin-top:8px">Abbrechen</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: GAME -->
+  <div class="screen" id="screen-game">
+    <div style="text-align:center; margin-bottom:16px;">
+      <span class="status-badge badge-waiting" id="game-status">📵 Ruhezustand</span>
+    </div>
+    <div id="game-players"></div>
+    <div style="margin-top:20px;">
+      <button class="btn btn-primary" id="btn-game-start" onclick="startGamePhase()">▶️ Start</button>
+      <button class="btn btn-danger" onclick="endGame()" style="margin-top:8px">🏁 Beenden</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: GAME OVER -->
+  <div class="screen" id="screen-gameover">
+    <div class="game-over-screen">
+      <div class="trophy">🏆</div>
+      <div class="winner-text" id="winner-text">Team 1 gewinnt!</div>
+      <p id="gameover-subtitle" style="color:#888; margin-bottom:24px;"></p>
+      <button class="btn btn-primary" onclick="showScreen('screen-menu')">🏠 Zurück zum Menü</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- COUNTDOWN OVERLAY -->
+<div class="countdown-overlay" id="countdown-overlay">
+  <div class="countdown-number" id="countdown-number">5</div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification"></div>
+
+<script>
+let gameState = {
+  mode: 'team',
+  players: [],
+  phase: 'waiting', // waiting, rest, playing, over
+  teams: 3,
+  gameName: 'Mein Spiel'
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showNotification(msg) {
+  const n = document.getElementById('notification');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2500);
+}
+
+function selectMode(el, mode) {
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  gameState.mode = mode;
+  document.getElementById('team-count-group').style.display = mode === 'team' ? 'block' : 'none';
+}
+
+function filterLobby() {
+  const q = document.getElementById('join-game-name').value.toLowerCase();
+  document.querySelectorAll('.lobby-game').forEach(g => {
+    g.style.display = g.querySelector('.game-name').textContent.toLowerCase().includes(q) ? 'block' : 'none';
+  });
+}
+
+function startHosting() {
+  gameState.gameName = document.getElementById('create-game-name').value || 'Mein Spiel';
+  gameState.teams = parseInt(document.getElementById('team-count').value);
+  const hostName = document.getElementById('host-name').value || 'Host';
+  const handicap = parseInt(document.getElementById('host-handicap').value);
+
+  gameState.players = [{
+    name: hostName,
+    team: 1,
+    hp: 100,
+    handicap: handicap,
+    eliminated: false,
+    isHost: true
+  }];
+
+  showScreen('screen-waiting');
+  renderWaiting();
+
+  // Simulate other players joining
+  const fakeNames = ['Alex', 'Bella', 'Chris', 'Dana', 'Erik', 'Finn'];
+  let joinIdx = 0;
+  const joinInterval = setInterval(() => {
+    if (joinIdx >= 2 || gameState.players.length >= 5) {
+      clearInterval(joinInterval);
+      return;
+    }
+    const team = gameState.mode === 'team' ? (joinIdx % gameState.teams) + 1 : 0;
+    gameState.players.push({
+      name: fakeNames[joinIdx],
+      team: team,
+      hp: 100,
+      handicap: 50,
+      eliminated: false,
+      isHost: false
+    });
+    joinIdx++;
+    renderWaiting();
+    showNotification(`📱 ${fakeNames[joinIdx-1]} ist beigetreten!`);
+  }, 2000);
+}
+
+function joinGame() {
+  const name = document.getElementById('join-name').value || 'Player';
+  const team = parseInt(document.getElementById('join-team').value);
+
+  gameState.players = [
+    { name: 'Host', team: 1, hp: 100, handicap: 50, eliminated: false, isHost: true },
+    { name: 'Alex', team: 2, hp: 100, handicap: 50, eliminated: false, isHost: false },
+    { name: name, team: team, hp: 100, handicap: 50, eliminated: false, isHost: false }
+  ];
+
+  showScreen('screen-waiting');
+  renderWaiting();
+  showNotification('✅ Du bist beigetreten! Warte auf den Host...');
+}
+
+function renderWaiting() {
+  const container = document.getElementById('waiting-players');
+  container.innerHTML = gameState.players.map(p => `
+    <div class="player-card">
+      <div class="avatar">${p.name[0].toUpperCase()}</div>
+      <div class="info">
+        <div class="name">${p.name} ${p.isHost ? '👑' : ''}</div>
+        <div class="team">${gameState.mode === 'team' ? 'Team ' + p.team : 'Solo'} · Handicap: ${p.handicap}</div>
+      </div>
+      <span class="status-badge badge-playing">Bereit</span>
+    </div>
+  `).join('');
+  document.getElementById('btn-start').disabled = gameState.players.length < 2;
+  document.getElementById('waiting-subtitle').textContent = `${gameState.players.length} Spieler bereit · ${gameState.mode === 'team' ? 'Team Mode' : 'Free-For-All'}`;
+}
+
+function startCountdown() {
+  let count = 5;
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl = document.getElementById('countdown-number');
+  overlay.classList.add('active');
+  numEl.textContent = count;
+
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      numEl.textContent = count;
+    } else {
+      clearInterval(interval);
+      overlay.classList.remove('active');
+      gameState.phase = 'rest';
+      showScreen('screen-game');
+      renderGame();
+      showNotification('📵 Ruhezustand – Handys ablegen!');
+    }
+  }, 1000);
+}
+
+function startGamePhase() {
+  let count = 5;
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl = document.getElementById('countdown-number');
+  overlay.classList.add('active');
+  numEl.textContent = count;
+
+  const interval = setInterval(() => {
+    count--;
+    if (count > 0) {
+      numEl.textContent = count;
+    } else {
+      clearInterval(interval);
+      overlay.classList.remove('active');
+      gameState.phase = 'playing';
+      renderGame();
+      showNotification('🎮 Los! Schüttel deine Gegner!');
+      simulateGame();
+    }
+  }, 1000);
+}
+
+function simulateGame() {
+  const activePlayers = gameState.players.filter(p => !p.eliminated);
+  if (activePlayers.length <= 1) {
+    endGame();
+    return;
+  }
+
+  const tick = setInterval(() => {
+    // Simulate random HP loss
+    const active = gameState.players.filter(p => !p.eliminated);
+    if (active.length <= 1) {
+      clearInterval(tick);
+      setTimeout(endGame, 1000);
+      return;
+    }
+
+    // Random damage to random players
+    const target = active[Math.floor(Math.random() * active.length)];
+    const damage = Math.floor(Math.random() * 8) + 2;
+    target.hp = Math.max(0, target.hp - damage);
+
+    // Small regen for others
+    active.forEach(p => {
+      if (p !== target && p.hp < 100) p.hp = Math.min(100, p.hp + 1);
+    });
+
+    // Check elimination
+    if (target.hp <= 0) {
+      target.eliminated = true;
+      showNotification(`💀 ${target.name} ist ausgeschieden!`);
+      // Play elimination tone simulation
+      playTone(2000);
+    }
+
+    renderGame();
+
+    // Add shake effect
+    document.getElementById('app').classList.add('shake-animation');
+    setTimeout(() => document.getElementById('app').classList.remove('shake-animation'), 200);
+
+  }, 1500);
+
+  // Store interval for cleanup
+  gameState._tickInterval = tick;
+}
+
+function playTone(duration) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 440;
+    osc.type = 'sine';
+    gain.gain.value = 0.3;
+    osc.start();
+    osc.stop(ctx.currentTime + duration / 1000);
+  } catch(e) {}
+}
+
+function renderGame() {
+  const container = document.getElementById('game-players');
+  const statusEl = document.getElementById('game-status');
+  const startBtn = document.getElementById('btn-game-start');
+
+  if (gameState.phase === 'rest') {
+    statusEl.textContent = '📵 Ruhezustand';
+    statusEl.className = 'status-badge badge-waiting';
+    startBtn.textContent = '▶️ Start (Ruhe beendet)';
+    startBtn.disabled = false;
+  } else if (gameState.phase === 'playing') {
+    statusEl.textContent = '🎮 Im Spiel!';
+    statusEl.className = 'status-badge badge-playing';
+    startBtn.textContent = '⏸️ Pausiert';
+    startBtn.disabled = true;
+  }
+
+  container.innerHTML = gameState.players.map(p => {
+    const hpClass = p.hp > 60 ? 'hp-green' : p.hp > 30 ? 'hp-yellow' : 'hp-red';
+    return `
+      <div class="player-card ${p.eliminated ? 'eliminated' : ''}">
+        <div class="avatar">${p.name[0].toUpperCase()}</div>
+        <div class="info">
+          <div class="name">${p.name} ${p.isHost ? '👑' : ''}</div>
+          <div class="team">${gameState.mode === 'team' ? 'Team ' + p.team : 'Solo'}</div>
+          <div class="hp-bar-container">
+            <div class="hp-bar ${hpClass}" style="width:${p.hp}%"></div>
+          </div>
+        </div>
+        <div class="hp-text" style="color:${p.hp > 60 ? '#2ecc71' : p.hp > 30 ? '#f39c12' : '#e74c3c'}">${p.hp}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function endGame() {
+  if (gameState._tickInterval) clearInterval(gameState._tickInterval);
+  gameState.phase = 'over';
+
+  const active = gameState.players.filter(p => !p.eliminated);
+  let winnerText;
+  if (active.length === 1) {
+    winnerText = gameState.mode === 'team' ? `Team ${active[0].team} gewinnt!` : `${active[0].name} gewinnt!`;
+  } else if (gameState.mode === 'team') {
+    // Determine winning team by highest total HP
+    const teamHP = {};
+    active.forEach(p => {
+      teamHP[p.team] = (teamHP[p.team] || 0) + p.hp;
+    });
+    const bestTeam = Object.entries(teamHP).sort((a,b) => b[1] - a[1])[0][0];
+    winnerText = `Team ${bestTeam} gewinnt!`;
+  } else {
+    const best = active.sort((a,b) => b.hp - a.hp)[0];
+    winnerText = `${best.name} gewinnt!`;
+  }
+
+  document.getElementById('winner-text').textContent = winnerText;
+  document.getElementById('gameover-subtitle').textContent = `${gameState.players.length} Spieler · ${gameState.mode === 'team' ? 'Team Mode' : 'Free-For-All'} · ${gameState.gameName}`;
+  showScreen('screen-gameover');
+}
+</script>
+</body>
+</html>   
